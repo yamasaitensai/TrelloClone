@@ -2,11 +2,10 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-// InputProps インターフェースを削除し、直接 React.InputHTMLAttributes<HTMLInputElement> を使用
-// export interface InputProps
-//   extends React.InputHTMLAttributes<HTMLInputElement> {}
+// インターフェースの代わりに型エイリアスを使用
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
     return (
       <input
