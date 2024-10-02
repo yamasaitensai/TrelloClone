@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input"
 interface Card {
   id: string
   content: string
+  // 必要に応じて他のプロパティを追加
 }
 
 interface List {
   id: string
   title: string
   cards: Card[]
+  // 必要に応じて他のプロパティを追加
 }
 
 export function TrelloCloneComponent() {
@@ -82,8 +84,52 @@ export function TrelloCloneComponent() {
   }
 
   const onDragEnd = (result: DropResult) => {
-    // ドラッグ＆ドロップの処理をここに実装
-  }
+    const { source, destination, type } = result;
+    
+    if (!destination) {
+      return;
+    }
+
+    if (type === "LIST") {
+      // リストの並び替え処理
+      const newLists = Array.from(lists);
+      const [reorderedList] = newLists.splice(source.index, 1);
+      newLists.splice(destination.index, 0, reorderedList);
+      setLists(newLists);
+    } else {
+      // カードの移動処理
+      const sourceList = lists.find(list => list.id === source.droppableId);
+      const destList = lists.find(list => list.id === destination.droppableId);
+      
+      if (sourceList && destList) {
+        if (source.droppableId === destination.droppableId) {
+          // 同じリスト内での移動
+          const newCards = Array.from(sourceList.cards);
+          const [movedCard] = newCards.splice(source.index, 1);
+          newCards.splice(destination.index, 0, movedCard);
+          
+          const newList = { ...sourceList, cards: newCards };
+          setLists(lists.map(list => list.id === newList.id ? newList : list));
+        } else {
+          // 異なるリスト間での移動
+          const sourceCards = Array.from(sourceList.cards);
+          const [movedCard] = sourceCards.splice(source.index, 1);
+          const destCards = Array.from(destList.cards);
+          destCards.splice(destination.index, 0, movedCard);
+          
+          setLists(lists.map(list => {
+            if (list.id === source.droppableId) {
+              return { ...list, cards: sourceCards };
+            }
+            if (list.id === destination.droppableId) {
+              return { ...list, cards: destCards };
+            }
+            return list;
+          }));
+        }
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-[#b04d7e]">
